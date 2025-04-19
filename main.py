@@ -4,6 +4,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_groq import ChatGroq
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -22,6 +23,15 @@ os.environ['HF_TOKEN'] = os.getenv("HF_TOKEN")
 
 # Initialize FastAPI app
 app = FastAPI()
+
+# Add CORS middleware to allow cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5177"],  # Allows only localhost:5177 (your frontend)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Shared LLM and embedding model
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -74,7 +84,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 class QueryModel(BaseModel):
     query: str
 
-@app.post("/ask_question/")
+@app.post("/ask_question/")  
 async def ask_question(data: QueryModel):
     global global_retriever
 
