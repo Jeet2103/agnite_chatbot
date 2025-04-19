@@ -23,21 +23,17 @@ os.environ['HF_TOKEN'] = os.getenv("HF_TOKEN")
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware to allow cross-origin requests from any localhost port
+# Allow all origins and all methods/headers
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost",
-        *[f"http://localhost:{port}" for port in range(1024, 65535)]
-    ],
+    allow_origins=["*"],  # Allow requests from all domains
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Shared LLM and embedding model
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
 llm = ChatGroq(groq_api_key=os.environ['GROQ_API_KEY'], model_name="Llama3-70b-8192")
 
 # Prompt template
@@ -52,10 +48,10 @@ prompt = ChatPromptTemplate.from_template(
     """
 )
 
-# Global retriever to be reused
+# Global retriever to reuse
 global_retriever = None
 
-# Route 1: Upload PDF
+# Upload PDF Endpoint
 @app.post("/upload_pdf/")
 async def upload_pdf(file: UploadFile = File(...)):
     global global_retriever
@@ -74,13 +70,14 @@ async def upload_pdf(file: UploadFile = File(...)):
         vector_store = FAISS.from_documents(split_docs, embeddings)
         global_retriever = vector_store.as_retriever()
 
-        # Cleanup
+        # Cleanup temp file
         os.remove(file_path)
+
         return {"message": "PDF uploaded and processed successfully."}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-# Route 2: Ask question
+# Ask Question Endpoint
 class QueryModel(BaseModel):
     query: str
 
