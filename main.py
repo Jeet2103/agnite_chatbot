@@ -15,7 +15,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEmbeddings
 
-
 # Load environment variables
 load_dotenv()
 os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
@@ -24,20 +23,21 @@ os.environ['HF_TOKEN'] = os.getenv("HF_TOKEN")
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware to allow cross-origin requests
+# Add CORS middleware to allow cross-origin requests from any localhost port
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5177"],  # Allows only localhost:5177 (your frontend)
+    allow_origins=[
+        "http://localhost",
+        *[f"http://localhost:{port}" for port in range(1024, 65535)]
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Shared LLM and embedding model
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-# embeddings = OllamaEmbeddings(
-#     model="llama3.1"
-# )
+
 llm = ChatGroq(groq_api_key=os.environ['GROQ_API_KEY'], model_name="Llama3-70b-8192")
 
 # Prompt template
@@ -84,7 +84,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 class QueryModel(BaseModel):
     query: str
 
-@app.post("/ask_question/")  
+@app.post("/ask_question/")
 async def ask_question(data: QueryModel):
     global global_retriever
 
