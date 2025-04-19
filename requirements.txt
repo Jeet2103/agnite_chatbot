@@ -10,3 +10,4 @@ langchain-huggingface
 faiss-cpu
 huggingface-hub
 PyPDF2
+python-multipart
