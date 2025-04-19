@@ -13,13 +13,14 @@ from langchain.chains import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_ollama import OllamaEmbeddings
-from langchain_openai import OpenAIEmbeddings
+
+GROQ_API_KEY = "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"
+HF_TOKEN = "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"
 
 # Load environment variables
 load_dotenv()
-os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
-os.environ['HF_TOKEN'] = os.getenv("HF_TOKEN")
+os.environ['GROQ_API_KEY'] = GROQ_API_KEY
+os.environ['HF_TOKEN'] = HF_TOKEN
 
 # Initialize FastAPI app
 app = FastAPI()
