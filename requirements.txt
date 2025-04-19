@@ -9,5 +9,5 @@ langchain-groq
 langchain-huggingface
 faiss-cpu
 huggingface-hub
-PyPDF2
+PyPDF
 python-multipart
